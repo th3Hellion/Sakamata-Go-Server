@@ -7,8 +7,6 @@ import (
   "net/http"
   "os"
   "time"
-
-  "github.com/joho/godotenv"
 )
 
 type VideoData struct {
@@ -83,10 +81,6 @@ func fetchData() {
 }
 
 func main() {
-  err := godotenv.Load()
-  if err != nil {
-    log.Fatalf("Failed to load .env file: %v", err)
-  }
 
   fetchData()
 
