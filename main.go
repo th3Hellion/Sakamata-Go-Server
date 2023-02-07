@@ -3,6 +3,7 @@ package main
 import (
   "encoding/json"
   "fmt"
+  "github.com/joho/godotenv"
   "log"
   "net/http"
   "os"
@@ -81,6 +82,10 @@ func fetchData() {
 }
 
 func main() {
+  err := godotenv.Load()
+  if err != nil {
+    log.Fatalf("Error loading .env file")
+  }
 
   fetchData()
 
