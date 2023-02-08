@@ -5,6 +5,7 @@ import (
   "fmt"
   "github.com/joho/godotenv"
   "github.com/rs/cors"
+  "io"
   "log"
   "net/http"
   "os"
@@ -21,34 +22,33 @@ type VideoData struct {
 var videoData VideoData
 
 func fetchData() {
-
   var channelID = os.Getenv("CHANNEL_ID")
   var apiKey = os.Getenv("API_KEY")
+
   var origin = "https://lizasil.github.io/Sakamata"
   fmt.Println("Fetching Data at:", time.Now().Format(time.RFC1123))
 
   url := fmt.Sprintf("https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=%s&channelType=any&order=date&type=video&videoCaption=any&videoDefinition=any&videoDimension=any&videoDuration=any&videoEmbeddable=any&videoLicense=any&videoSyndicated=any&videoType=any&key=%s&origin=%s", channelID, apiKey, origin)
   res, err := http.Get(url)
   if err != nil {
-    log.Fatalf("Failed to fetch data: %v", err)
+    fmt.Println("Failed to fetch the data")
   }
   defer res.Body.Close()
 
   var result map[string]interface{}
   if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
-    log.Fatalf("Failed to decode data: %v", err)
+    fmt.Println("Failed to decode the result")
   }
-  fmt.Println(result)
 
   items, ok := result["items"].([]interface{})
   if !ok {
     itemsInterf := result["items"]
     if itemsInterf == nil {
-      log.Fatalf("items not found in result")
+      log.Fatal("Failed to get items from the result")
     }
     items, ok = itemsInterf.([]interface{})
     if !ok || len(items) == 0 {
-      log.Fatalf("Failed to get items from the result")
+      log.Fatal("Failed to get items from the result")
     }
   }
 
@@ -79,8 +79,36 @@ func fetchData() {
     }
     livestreamStatus := mostRecentVideo["snippet"].(map[string]interface{})["liveBroadcastContent"].(string)
     videoID := mostRecentVideo["id"].(map[string]interface{})["videoId"].(string)
-    videoData = VideoData{LivestreamStatus: livestreamStatus, VideoID: videoID, Updated: "Stream is Offline", FetchedAt: time.Now()}
+    videoData = VideoData{LivestreamStatus: livestreamStatus, VideoID: videoID, Updated: fetchEndTime(videoID, apiKey), FetchedAt: time.Now()}
   }
+}
+
+func fetchEndTime(videoId, apiKey string) string {
+  url := fmt.Sprintf("https://youtube.googleapis.com/youtube/v3/videos?part=liveStreamingDetails&id=%s&key=%s", videoId, apiKey)
+  resp, err := http.Get(url)
+  if err != nil {
+    return ""
+  }
+  defer resp.Body.Close()
+  body, err := io.ReadAll(resp.Body)
+  if err != nil {
+    return ""
+  }
+  var data struct {
+    Items []struct {
+      LiveStreamingDetails struct {
+        ActualEndTime string `json:"actualEndTime"`
+      } `json:"liveStreamingDetails"`
+    } `json:"items"`
+  }
+  err = json.Unmarshal(body, &data)
+  if err != nil {
+    return ""
+  }
+  if len(data.Items) == 0 {
+    return ""
+  }
+  return data.Items[0].LiveStreamingDetails.ActualEndTime
 }
 
 func main() {
