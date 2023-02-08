@@ -44,12 +44,14 @@ func fetchData() {
   if !ok {
     itemsInterf := result["items"]
     if itemsInterf == nil {
-      // Placeholder data
+
       videoData = VideoData{LivestreamStatus: "none", VideoID: "none", Updated: "none", FetchedAt: time.Now()}
+      return
     }
     items, ok = itemsInterf.([]interface{})
     if !ok || len(items) == 0 {
       videoData = VideoData{LivestreamStatus: "none", VideoID: "none", Updated: "none", FetchedAt: time.Now()}
+      return
     }
   }
 
