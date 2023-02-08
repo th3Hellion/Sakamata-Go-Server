@@ -20,12 +20,12 @@ type VideoData struct {
 }
 
 var videoData VideoData
+var origin = "https://lizasil.github.io/Sakamata"
 
 func fetchData() {
   var channelID = os.Getenv("CHANNEL_ID")
   var apiKey = os.Getenv("API_KEY")
 
-  var origin = "https://lizasil.github.io/Sakamata"
   fmt.Println("Fetching Data at:", time.Now().Format(time.RFC1123))
 
   url := fmt.Sprintf("https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=%s&channelType=any&order=date&type=video&videoCaption=any&videoDefinition=any&videoDimension=any&videoDuration=any&videoEmbeddable=any&videoLicense=any&videoSyndicated=any&videoType=any&key=%s&origin=%s", channelID, apiKey, origin)
@@ -44,11 +44,12 @@ func fetchData() {
   if !ok {
     itemsInterf := result["items"]
     if itemsInterf == nil {
-      return
+      // Placeholder data
+      videoData = VideoData{LivestreamStatus: "none", VideoID: "none", Updated: "none", FetchedAt: time.Now()}
     }
     items, ok = itemsInterf.([]interface{})
     if !ok || len(items) == 0 {
-      return
+      videoData = VideoData{LivestreamStatus: "none", VideoID: "none", Updated: "none", FetchedAt: time.Now()}
     }
   }
 
