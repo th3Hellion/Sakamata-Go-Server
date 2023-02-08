@@ -83,6 +83,7 @@ func fetchData() {
 }
 
 func main() {
+  handler := cors.AllowAll().Handler(http.DefaultServeMux)
   err := godotenv.Load()
   if err != nil {
     log.Fatalf("Error loading .env file")
@@ -90,22 +91,21 @@ func main() {
 
   fetchData()
 
-  ticker := time.NewTicker(14 * time.Minute)
+  ticker := time.NewTicker(14 * time.Second)
   go func() {
     for range ticker.C {
-      fetchData()
+      //fetchData()
+      fmt.Println("Fetching Data at:", time.Now().Format(time.RFC1123))
     }
   }()
 
   http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Access-Control-Allow-Origin", "*")
-    w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+    w.Header().Set("Access-Control-Allow-Methods", "GET")
     w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(videoData)
   })
-
-  handler := cors.Default().Handler(http.DefaultServeMux)
 
   fmt.Println("Listening on port", 3000)
   log.Fatal(http.ListenAndServe(":3000", handler))
