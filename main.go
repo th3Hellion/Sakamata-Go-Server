@@ -95,7 +95,7 @@ func main() {
   ticker := time.NewTicker(14 * time.Second)
   go func() {
     for range ticker.C {
-      //fetchData()
+      fetchData()
       fmt.Println("Fetching Data at:", time.Now().Format(time.RFC1123))
     }
   }()
