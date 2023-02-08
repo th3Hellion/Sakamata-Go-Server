@@ -44,11 +44,11 @@ func fetchData() {
   if !ok {
     itemsInterf := result["items"]
     if itemsInterf == nil {
-      log.Fatal("Failed to get items from the result")
+      return
     }
     items, ok = itemsInterf.([]interface{})
     if !ok || len(items) == 0 {
-      log.Fatal("Failed to get items from the result")
+      return
     }
   }
 
@@ -120,7 +120,7 @@ func main() {
 
   fetchData()
 
-  ticker := time.NewTicker(14 * time.Second)
+  ticker := time.NewTicker(14 * time.Minute)
   go func() {
     for range ticker.C {
       fetchData()
