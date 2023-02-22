@@ -26,8 +26,6 @@ func fetchData() {
   var channelID = os.Getenv("CHANNEL_ID")
   var apiKey = os.Getenv("API_KEY")
 
-  fmt.Println("Fetching Data at:", time.Now().Format(time.RFC1123))
-
   url := fmt.Sprintf("https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=%s&channelType=any&order=date&type=video&videoCaption=any&videoDefinition=any&videoDimension=any&videoDuration=any&videoEmbeddable=any&videoLicense=any&videoSyndicated=any&videoType=any&key=%s&origin=%s", channelID, apiKey, origin)
   res, err := http.Get(url)
   if err != nil {
@@ -123,7 +121,7 @@ func main() {
 
   fetchData()
 
-  ticker := time.NewTicker(14 * time.Minute)
+  ticker := time.NewTicker(15 * time.Minute)
   go func() {
     for range ticker.C {
       fetchData()
