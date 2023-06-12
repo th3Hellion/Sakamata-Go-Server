@@ -80,7 +80,14 @@ func fetchData() {
     }
     livestreamStatus := mostRecentVideo["snippet"].(map[string]interface{})["liveBroadcastContent"].(string)
     videoID := mostRecentVideo["id"].(map[string]interface{})["videoId"].(string)
-    videoData = VideoData{LivestreamStatus: livestreamStatus, VideoID: videoID, Updated: fetchEndTime(videoID, apiKey), FetchedAt: time.Now()}
+    videoData = VideoData{LivestreamStatus: livestreamStatus, VideoID: videoID,
+      Updated: func() string {
+        if liveItem["snippet"].(map[string]interface{})["liveBroadcastContent"].(string) != "" {
+          return liveItem["snippet"].(map[string]interface{})["liveBroadcastContent"].(string)
+        } else {
+          return fetchEndTime(videoID, apiKey)
+        }
+      }(), FetchedAt: time.Now()}
   }
 }
 
