@@ -82,8 +82,8 @@ func fetchData() {
     videoID := mostRecentVideo["id"].(map[string]interface{})["videoId"].(string)
     videoData = VideoData{LivestreamStatus: livestreamStatus, VideoID: videoID,
       Updated: func() string {
-        if liveItem["snippet"].(map[string]interface{})["liveBroadcastContent"].(string) != "" || liveItem["snippet"].(map[string]interface{})["liveBroadcastContent"] != nil {
-          return liveItem["snippet"].(map[string]interface{})["liveBroadcastContent"].(string)
+        if liveItem["snippet"].(map[string]interface{})["publishedAt"].(string) != "" || liveItem["snippet"].(map[string]interface{})["publishedAt"] != nil {
+          return liveItem["snippet"].(map[string]interface{})["publishedAt"].(string)
         } else {
           return fetchEndTime(videoID, apiKey)
         }
