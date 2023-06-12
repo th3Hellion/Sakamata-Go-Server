@@ -69,26 +69,36 @@ func fetchData() {
   } else {
     var mostRecentVideo map[string]interface{}
     for i, item := range items {
-      if i == 0 {
-        mostRecentVideo = item.(map[string]interface{})
+      itemMap := item.(map[string]interface{})
+      publishedAt := itemMap["snippet"].(map[string]interface{})["publishedAt"]
+      if publishedAt == nil || publishedAt == "" {
         continue
       }
-      itemMap := item.(map[string]interface{})
-      if mostRecentVideo["snippet"].(map[string]interface{})["publishedAt"].(string) < itemMap["snippet"].(map[string]interface{})["publishedAt"].(string) {
+      if i == 0 {
+        mostRecentVideo = itemMap
+        continue
+      }
+      if mostRecentVideo["snippet"].(map[string]interface{})["publishedAt"].(string) < publishedAt.(string) {
         mostRecentVideo = itemMap
       }
     }
-    livestreamStatus := mostRecentVideo["snippet"].(map[string]interface{})["liveBroadcastContent"].(string)
-    videoID := mostRecentVideo["id"].(map[string]interface{})["videoId"].(string)
-    videoData = VideoData{LivestreamStatus: livestreamStatus, VideoID: videoID,
-      Updated: func() string {
-        if liveItem["snippet"].(map[string]interface{})["publishedAt"].(string) != "" || liveItem["snippet"].(map[string]interface{})["publishedAt"] != nil {
-          return liveItem["snippet"].(map[string]interface{})["publishedAt"].(string)
-        } else {
-          return fetchEndTime(videoID, apiKey)
-        }
-      }(), FetchedAt: time.Now()}
+    if mostRecentVideo != nil {
+      livestreamStatus := mostRecentVideo["snippet"].(map[string]interface{})["liveBroadcastContent"].(string)
+      videoID := mostRecentVideo["id"].(map[string]interface{})["videoId"].(string)
+      publishedAt := mostRecentVideo["snippet"].(map[string]interface{})["publishedAt"].(string)
+
+      updated := fetchEndTime(videoID, apiKey)
+      if updated == "" {
+        updated = publishedAt // Assign the value of `publishedAt` to `updated`
+      }
+
+      videoData = VideoData{LivestreamStatus: livestreamStatus, VideoID: videoID, Updated: updated, FetchedAt: time.Now()}
+    } else {
+      videoData = VideoData{LivestreamStatus: "none", VideoID: "none", Updated: "none", FetchedAt: time.Now()}
+    }
+
   }
+
 }
 
 func fetchEndTime(videoId, apiKey string) string {
