@@ -20,7 +20,7 @@ type VideoData struct {
 }
 
 var videoData VideoData
-var origin = "https://lizasil.github.io/Sakamata"
+var origin = "https://th3Hellion.github.io/Sakamata"
 
 func fetchData() {
   var channelID = os.Getenv("CHANNEL_ID")
